@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ElephantRepository } from '../../../core/repositories/elephant.repository';
+
+import { from, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import { ElephantModel } from '../../../core/domain/elephant.model';
-import { from, Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { ElephantRepository } from '../../../core/repositories/elephant.repository';
 import { ElephantMockEntity } from './elephant-mock-entity';
 import { ElephantMockRepositoryMapper } from './elephant-mock-repository-mapper';
 
@@ -13,7 +15,7 @@ export class ElephantMockRepository extends ElephantRepository {
 
   private mapper = new ElephantMockRepositoryMapper();
 
-  elephants = [
+  elephants: ElephantMockEntity[] = [
     {
       'id': 1,
       'name': 'Mr. MockBig',
@@ -39,9 +41,11 @@ export class ElephantMockRepository extends ElephantRepository {
   }
 
   getElephantById(id: number): Observable<ElephantModel> {
-    return from(this.elephants)
-      .pipe(filter((elephant: ElephantMockEntity) => elephant.id === id))
-      .pipe(map(this.mapper.mapFrom));
+    return of(this.elephants)
+      .pipe(
+        map((elephants: ElephantMockEntity[]) => elephants.filter(elephant => elephant.id === id)[0]),
+        map(this.mapper.mapFrom)
+      )
   }
 
   getAllElephants(): Observable<ElephantModel> {
